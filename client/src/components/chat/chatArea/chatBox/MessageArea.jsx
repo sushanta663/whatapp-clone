@@ -24,11 +24,12 @@ const Messages = styled(Box)`
 const MessageArea = ({ conversation }) => {
 
   const [messages , setMessages] = useState([]);
+  const [incomingMessage, setIncomingMessage] = useState(null);
   const [newMessageFlag , setNewMessageFlag] = useState(false);
   const [value , setValue] = useState('');
   const [file , setFile] = useState();
 
-  const { account , person } = useContext(AccountContext);
+  const { account , person, socket } = useContext(AccountContext);
 
   const sendText = async (e) => {
     const code = e.keyCode || e.which ;
@@ -40,12 +41,30 @@ const MessageArea = ({ conversation }) => {
         type: 'text',
         text: value,
       }
+
+      socket.current.emit('sendMessage', message);
       await newMessage(message);
 
       setValue('');
       setNewMessageFlag(prev => !prev)
     }
   }
+
+  useEffect(() => {
+        socket.current.on('getMessage', data => {
+            setIncomingMessage({
+                ...data,
+                createdAt: Date.now()
+            })
+        })
+    }, []);
+    
+  useEffect(() => {
+      incomingMessage && conversation?.members?.includes(incomingMessage.senderId) && 
+          setMessages((prev) => [...prev, incomingMessage]);
+      
+  }, [incomingMessage, conversation]);
+
 
   useEffect(() => {
     const getMessageDetails = async () => {

@@ -1,5 +1,9 @@
+import { useContext } from 'react';
+
+
 import { Box, styled, Typography } from '@mui/material';
 import { Search , MoreVert , VideocamRounded } from '@mui/icons-material';
+import { AccountContext } from '../../../../context/AccountProvider';
 
 const Container = styled(Box)`
   display: flex;
@@ -44,13 +48,15 @@ const VideoIcon = styled(VideocamRounded)`
 
 
 const Header = ( {person} ) => {
+  
+  const { activeUsers } = useContext(AccountContext);
 
   return(
     <Container>
       <Image src={ person.picture } alt="pd" />
       <Box>
         <Name>{person.name}</Name>
-        <Status>Offline</Status>
+          <Status>{activeUsers?.find(user => user.sub === person.sub) ? 'Online' : 'Offline'}</Status>    
       </Box>
       <IconContainer>
         <VideoIcon />
